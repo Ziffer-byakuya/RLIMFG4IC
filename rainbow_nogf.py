@@ -272,7 +272,6 @@ def compute_td_loss(batch_size,is_side_info):
         
     optimizer.zero_grad()
     loss.backward()
-    # torch.nn.utils.clip_grad_norm_(current_model.parameters(),0.8)
     optimizer.step()
     lr_schedule.step()
     return loss

@@ -9,7 +9,6 @@ Demand_Max = 20
 Demand_Mean = 5
 
 demand_realizations = np.arange(Demand_Max + 1)
-#mu is the expectation of poisson distribution, which is lambda in paper
 demand_probabilities = poisson.pmf(np.arange(Demand_Max + 1), mu=Demand_Mean)
 demand_probabilities[-1] += 1 - np.sum(demand_probabilities)
 
