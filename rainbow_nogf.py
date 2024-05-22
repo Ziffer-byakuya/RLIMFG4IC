@@ -322,8 +322,6 @@ def test_env(all_test_rewards):
     episode_in_reward = 0
     current_model.epsilon = 0
     for _ in range(1, test_num_frames + 1):
-        # action = current_model.act(state)
-        # print(frame_idx)
         next_state, reward,in_reward, q_arrivals = env.test_step(state,current_model,q_arrivals,mh_dqn)
         state = next_state
         episode_reward += reward
@@ -356,7 +354,6 @@ for times in range(0,50):
 
 
     update_target(current_model, target_model)
-    # update_target(mh_dqn, mh_dqn_target)
 
 
 
@@ -366,17 +363,13 @@ for times in range(0,50):
     all_test_rewards = []
     hot_g = Hot_Graph()
 
-    # current_model.epsilon = 1
     for episode in range(1,episodes+1):
         state = init_state
         q_arrivals = np.ones(len(init_state))
         episode_reward = 0
         episode_in_reward = 0
-        # if episode % 4 == 0:
-        #     current_model.epsilon /= 2
+
         for frame_idx in range(1, num_frames + 1):
-            # action = current_model.act(state)
-            # print(frame_idx)
             next_state, reward,in_reward, done, q_arrivals = env.step(state,current_model,replay_buffer,replay_buffer_side_info,q_arrivals,side_info_scale,mh_dqn,hot_g)
 
             state = next_state
@@ -396,8 +389,6 @@ for times in range(0,50):
             if frame_idx % target_update_freq == 0:
                 update_target(current_model, target_model)
 
-        
-        # plot(frame_idx, all_rewards, losses)
         try:
             print("Train:",episode,episode_reward/num_frames,episode_in_reward/num_frames,losses[-1],dqn_losses[-1])
         except:
@@ -405,4 +396,3 @@ for times in range(0,50):
         
         if episode>=1 and episode % test_per_episodes == 0:
             test_epi_avg_rewards, test_epi_avg_intr_rewards  = test_env(all_test_rewards)
-            # all_test_rewards.append(test_epi_avg_rewards)

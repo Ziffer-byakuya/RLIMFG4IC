@@ -302,13 +302,6 @@ def compute_td_loss(batch_size,is_side_info):
     reward     = torch.FloatTensor(reward)
     done       = torch.FloatTensor(np.float32(done))
 
-    # reward_intrinsic = reward_comb(state,action,batch_size,demand_real)
-    # # print(reward_intrinsic.mean())
-    # if reward_intrinsic.mean()>100:
-    #     reward_intrinsic = torch.zeros(reward_intrinsic.shape)
-    # reward += reward_intrinsic.cpu()/2
-
-    
     proj_dist = projection_distribution(next_state, reward, done)
     
     dist = current_model(state)
@@ -320,7 +313,6 @@ def compute_td_loss(batch_size,is_side_info):
         
     optimizer.zero_grad()
     loss.backward()
-    # torch.nn.utils.clip_grad_norm_(current_model.parameters(),0.8)
     optimizer.step()
     if not is_side_info:
         lr_schedule.step()
@@ -371,8 +363,6 @@ def test_env(all_test_rewards):
     episode_in_reward = 0
     current_model.epsilon = 0
     for _ in range(1, test_num_frames + 1):
-        # action = current_model.act(state)
-        # print(frame_idx)
         next_state, reward,in_reward, q_arrivals = env.test_step(state,current_model,q_arrivals,mh_dqn)
         state = next_state
         episode_reward += reward
@@ -405,7 +395,6 @@ for times in range(0,10):
 
 
     update_target(current_model, target_model)
-    # update_target(mh_dqn, mh_dqn_target)
 
 
 
@@ -418,21 +407,17 @@ for times in range(0,10):
     all_test_avg_rewards = []
     hot_g = Hot_Graph()
 
-    # current_model.epsilon = 0
     for episode in range(1,episodes+1):
         state = init_state
         q_arrivals = np.ones(len(init_state))
         episode_reward = 0
         episode_in_reward = 0
-        # if episode % 4 == 0:
-        #     current_model.epsilon /= 2
+ 
         if episode==side_use_episode:
             side_info_scale = 0
             update_per_step_side_info = 2000
             update_times_side_info = 0
         for frame_idx in range(1, num_frames + 1):
-            # action = current_model.act(state)
-            # print(frame_idx)
             next_state, reward,in_reward, done, q_arrivals = env.step(state,current_model,replay_buffer,replay_buffer_side_info,q_arrivals,side_info_scale,None,hot_g)
 
             state = next_state
@@ -463,7 +448,6 @@ for times in range(0,10):
             if frame_idx % target_update_freq == 0:
                 update_target(current_model, target_model)
 
-        # all_rewards.append(episode_reward/num_frames)
 
         try:
             print("Train:",episode,episode_reward/num_frames,episode_in_reward/num_frames,losses[-1],losses_side_info[-1],dqn_losses[-1],dqn_losses_side_info[-1])

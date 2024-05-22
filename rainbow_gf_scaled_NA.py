@@ -325,11 +325,6 @@ def compute_td_loss(batch_size,is_side_info):
     reward_intrinsic = reward_comb(state,action,batch_size,demand_real)
     reward_intrinsic = torch.clamp(reward_intrinsic,1e-9,max_in_reward)
     reward_intrinsic = reward_intrinsic.cpu()*in_reward_weight
-    # print(in_reward_weight)
-    
-    # print(reward_intrinsic.mean())
-    # if reward_intrinsic.mean()>max_in_reward:
-    #     reward_intrinsic = torch.zeros(reward_intrinsic.shape)
         
     reward =reward*(1-in_reward_weight) + reward_intrinsic.cpu()
     
@@ -344,7 +339,6 @@ def compute_td_loss(batch_size,is_side_info):
         
     optimizer.zero_grad()
     loss.backward()
-    # torch.nn.utils.clip_grad_norm_(current_model.parameters(),0.8)
     optimizer.step()
     if not is_side_info:
         lr_schedule.step()
@@ -373,7 +367,6 @@ def compute_mhdqn_loss(batch_size,is_side_info,head_index):
     
     mh_dqn_optimizer.zero_grad()
     loss.backward()
-    # torch.nn.utils.clip_grad_norm_(mh_dqn.parameters(),0.2)
     if not is_side_info:
         mh_dqn_optimizer.step()
     return loss
@@ -395,8 +388,6 @@ def test_env(all_test_rewards):
     episode_in_reward = 0
     current_model.epsilon = 0
     for _ in range(1, test_num_frames + 1):
-        # action = current_model.act(state)
-        # print(frame_idx)
         next_state, reward,in_reward, q_arrivals = env.test_step(state,current_model,q_arrivals,mh_dqn)
         state = next_state
         episode_reward += reward
@@ -446,7 +437,6 @@ for times in range(start_times*times_step,start_times*times_step+times_step):
     all_test_avg_rewards = []
     hot_g = Hot_Graph()
 
-    # current_model.epsilon = 1
     in_reward_weight = in_reward_weight_init
     for episode in range(1,episodes+1):
         in_reward_weight *= in_re_we_discount
@@ -454,15 +444,11 @@ for times in range(start_times*times_step,start_times*times_step+times_step):
         q_arrivals = np.ones(len(init_state))
         episode_reward = 0
         episode_in_reward = 0
-        # if episode % 4 == 0:
-        #     current_model.epsilon /= 2
         if episode==side_use_episode:
             side_info_scale = 0
             update_per_step_side_info = 2000
             update_times_side_info = 0
         for frame_idx in range(1, num_frames + 1):
-            # action = current_model.act(state)
-            # print(frame_idx)
             next_state, reward,in_reward, done, q_arrivals = env.step(state,current_model,replay_buffer,replay_buffer_side_info,q_arrivals,side_info_scale,mh_dqn,hot_g)
 
             state = next_state
@@ -515,7 +501,6 @@ for times in range(start_times*times_step,start_times*times_step+times_step):
                 update_target(current_model, target_model)
             if frame_idx % (target_update_freq*2) == 0:
                 update_target(mh_dqn, mh_dqn_target)
-        # all_rewards.append(episode_reward/num_frames)
 
         try:
             print("Train:",episode,episode_reward/num_frames,episode_in_reward/num_frames,losses[-1],losses_side_info[-1],dqn_losses[-1],dqn_losses_side_info[-1])
